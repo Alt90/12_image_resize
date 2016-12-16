@@ -10,9 +10,9 @@ def get_args():
     )
     parser.add_argument('path_to_file',
                         help='Path to imagefile')
-    parser.add_argument('--width',
+    parser.add_argument('--width', type=int,
                         help='Width result imagefile')
-    parser.add_argument('--height',
+    parser.add_argument('--height', type=int,
                         help='Height result imagefile')
     parser.add_argument('--scale', type=float,
                         help='Scale result imagefile')
@@ -41,6 +41,14 @@ def resize_image_by_scale(image, scale, output_path_to_file):
     save_resized_image(output_file, output_path_to_file)
 
 
+def resize_image_by_size(image, width, height, output_path_to_file):
+    width_old, height_old = get_image_size(image)
+    width_new = width or width_old
+    height_new = height or height_old
+    output_file = image.resize((width_new, height_new))
+    save_resized_image(output_file, output_path_to_file)
+
+
 def resize_image(args):
     image = Image.open(args.path_to_file)
     if (args.output is not None):
@@ -52,6 +60,8 @@ def resize_image(args):
             print("Do not use scale options with width or height options!")
             exit()
         resize_image_by_scale(image, args.scale, args.output)
+    if (args.width is not None or args.height is not None):
+        resize_image_by_size(image, args.width, args.height, args.output)
 
 
 if __name__ == '__main__':
