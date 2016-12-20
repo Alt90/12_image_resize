@@ -25,20 +25,19 @@ def get_image_size(image):
     return image.size
 
 
-def save_resized_image(output_file, output_path_to_file):
+def resized_file_dir(width, height, output_path_to_file):
     path, name = os.path.split(output_path_to_file)
-    size = list(get_image_size(output_file))
-    output_file.save('%s/%s__%sx%s%s' % (path,
-                                         name[:name.rindex('.')],
-                                         size[0],
-                                         size[1],
-                                         name[name.rindex('.'):]))
+    resized_file_name = '%s__%sx%s%s' % (name[:name.rindex('.')],
+                                         width,
+                                         height,
+                                         name[name.rindex('.'):])
+    return(os.path.join(path, resized_file_name))
 
 
 def resize_image_by_scale(image, scale, output_path_to_file):
     width, height = get_image_size(image)
     output_file = image.resize((int(width*scale), int(height*scale)))
-    save_resized_image(output_file, output_path_to_file)
+    output_file.save(resized_file_dir(int(width*scale), int(height*scale), output_path_to_file))
 
 
 def resize_image_by_size(image, width, height, output_path_to_file):
@@ -46,21 +45,21 @@ def resize_image_by_size(image, width, height, output_path_to_file):
     width_new = width or width_old
     height_new = height or height_old
     output_file = image.resize((width_new, height_new))
-    save_resized_image(output_file, output_path_to_file)
+    output_file.save(resized_file_dir(width_new, height_new, output_path_to_file))
 
 
 def resize_image(args):
     image = Image.open(args.path_to_file)
-    if (args.output is not None):
-        args.output = args.output + os.path.split(args.path_to_file)[1]
+    if args.output is not None:
+        args.output = os.path.join(args.output, os.path.split(args.path_to_file)[1])
     else:
         args.output = args.path_to_file
-    if (args.scale is not None):
+    if args.scale is not None:
         if (args.width or args.height is not None):
             print("Do not use scale options with width or height options!")
             exit()
         resize_image_by_scale(image, args.scale, args.output)
-    if (args.width is not None or args.height is not None):
+    if args.width is not None or args.height is not None:
         resize_image_by_size(image, args.width, args.height, args.output)
 
 
