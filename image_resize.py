@@ -34,33 +34,38 @@ def resized_file_dir(width, height, output_path_to_file):
     return(os.path.join(path, resized_file_name))
 
 
-def resize_image_by_scale(image, scale, output_path_to_file):
+def resize_image_by_scale(image, scale):
     width, height = get_image_size(image)
-    output_file = image.resize((int(width*scale), int(height*scale)))
-    output_file.save(resized_file_dir(int(width*scale), int(height*scale), output_path_to_file))
+    return (int(width*scale), int(height*scale))
 
 
-def resize_image_by_size(image, width, height, output_path_to_file):
+def resize_image_by_size(image, width, height):
     width_old, height_old = get_image_size(image)
-    width_new = width or width_old
-    height_new = height or height_old
-    output_file = image.resize((width_new, height_new))
-    output_file.save(resized_file_dir(width_new, height_new, output_path_to_file))
+    return (width or width_old, height or height_old)
+
+
+def save_resized_file(image, width, height, output_path_to_file):
+    output_file = image.resize((width, height))
+    output_file.save(resized_file_dir(width, height, output_path_to_file))
 
 
 def resize_image(args):
     image = Image.open(args.path_to_file)
+    width = height = None
     if args.output is not None:
-        args.output = os.path.join(args.output, os.path.split(args.path_to_file)[1])
+        args.output = os.path.join(args.output,
+                                   os.path.split(args.path_to_file)[1])
     else:
         args.output = args.path_to_file
     if args.scale is not None:
         if (args.width or args.height is not None):
             print("Do not use scale options with width or height options!")
             exit()
-        resize_image_by_scale(image, args.scale, args.output)
+        width, height = resize_image_by_scale(image, args.scale)
     if args.width is not None or args.height is not None:
-        resize_image_by_size(image, args.width, args.height, args.output)
+        width, height = resize_image_by_size(image, args.width, args.height)
+    if width is not None and height is not None:
+        save_resized_file(image, width, height, args.output)
 
 
 if __name__ == '__main__':
